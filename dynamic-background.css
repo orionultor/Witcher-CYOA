@@ -1,0 +1,25 @@
+.pb-12 {
+  /* Smooth transitioning for the background colour */
+  transition: background-color 300ms linear;
+
+  /* Smooth transitioning for the background image */
+  transition: background-image 300ms linear;
+}
+
+/* The default colour scheme, the one displayed at the very top */
+.default {
+  background-color: white;
+}
+
+/* Each of these represents a potential background colour or image */
+.enemies {
+  background-color: #900 !important;
+}
+
+.allies {
+  background-color: #090 !important;
+}
+
+.custom-image {
+  background-image: url("YOUR URL HERE") !important;
+}

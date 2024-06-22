@@ -1,23 +1,25 @@
 .pb-12 {
-  transition: background-color 270ms linear;
+  /* Smooth transitioning for the background colour */
+  transition: background-color 300ms linear;
+
+  /* Smooth transitioning for the background image */
+  transition: background-image 300ms linear;
 }
 
-#red {
-  background-color: #900;
+/* The default colour scheme, the one displayed at the very top */
+.default {
+  background-color: white;
 }
 
-#green {
-  background-color: #090;
+/* Each of these represents a potential background colour or image */
+.enemies {
+  background-color: #900 !important;
 }
 
-#blue {
-  background-color: #009;
+.allies {
+  background-color: #090 !important;
 }
 
-#purple {
-  background-color: purple;
-}
-
-#orange {
-  background-color: orange;
+.custom-image {
+  background-image: url("YOUR URL HERE") !important;
 }

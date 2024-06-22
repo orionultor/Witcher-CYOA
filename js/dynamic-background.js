@@ -38,22 +38,21 @@
  */
 // Change to true if there is a bug
 const DEBUG = false;
-// The amount of pixels from the centre that determine where the threshold for
-// transitioning is
-const centerThreshold = 45; // pixels
 
 // Whether a background colour should be set by default
 const setDefaultBackground = true;
 // Id in the css: `#red: { background: #900; }`
-const defaultBackgroundId = "red";
+const defaultBackgroundId = "default";
+
+// Choose to change the background whenever the div is centred.
+const changeWhenCentered = true;
+// The amount of pixels from the centre that determine where the threshold for
+// transitioning is
+const centerThreshold = 45; // pixels
 // END CONSTANTS
 
 function lastElement(arr) {
-  let returnValue = null;
-
-  if (setDefaultBackground) {
-    returnValue = defaultBackgroundId;
-  }
+  let returnValue = setDefaultBackground ? defaultBackgroundId : null;
 
   return arr ? arr.slice(-1) : returnValue;
 }
@@ -63,11 +62,11 @@ function isFullArray(arr) {
 }
 
 function debugObject(obj) {
-  console.log(`${JSON.stringify(obj, undefined, 2)}`);
+  console.log(`${JSON.stringify(obj, "obj is empty", 2)}`);
 }
 
 // Anonymous "self-invoking" function
-(function() {
+(function () {
   let startingTime = new Date().getTime();
   // Load the script
   let script = document.createElement("script");
@@ -76,24 +75,24 @@ function debugObject(obj) {
   document.getElementsByTagName("head")[0].appendChild(script);
 
   // Poll for jQuery to come into existence
-  let checkReady = function(callback) {
-      if (window.jQuery) {
-          callback(jQuery);
-      }
-      else {
-          window.setTimeout(function() { checkReady(callback); }, 20);
-      }
+  let checkReady = function (callback) {
+    if (window.jQuery) {
+      callback(jQuery);
+    } else {
+      window.setTimeout(function () {
+        checkReady(callback);
+      }, 20);
+    }
   };
 
   // Start polling...
-  checkReady(function($) {
+  checkReady(function ($) {
     // "Global" variables
-    // let previousBackground = undefined;
     let lastScrollTop = 0;
     let userScrolledDown = false;
     const historyObj = {
       objectsAbove: undefined, // array of strings
-      currentObject: undefined ,
+      currentObject: undefined,
     };
     let $previousThis;
     let scrollUpObject;
@@ -105,7 +104,7 @@ function debugObject(obj) {
     if (DEBUG) debugObject(historyObj);
 
     // This function goes once jQuery is loaded
-    $(function() {
+    $(function () {
       let endingTime = new Date().getTime();
       let tookTime = endingTime - startingTime;
       if (DEBUG) {
@@ -125,7 +124,7 @@ function debugObject(obj) {
       $win.scroll(function () {
         if ($win.scrollTop() <= 0) {
           if (DEBUG) console.log("Scrolled to Page Top");
-          
+
           if (setDefaultBackground) {
             if (historyObj.currentObject) {
               $(".pb-12").removeClass(historyObj.currentObject);
@@ -144,35 +143,44 @@ function debugObject(obj) {
     });
 
     // Check if the <div> is in the viewport
-    $.fn.isInViewport = function() {
+    $.fn.isInViewport = function () {
       /**
        * The absolute (in the context of the page) y position of the
        * elements, static
        */
       let elementTop = $(this).offset().top;
       let elementBottom = elementTop + $(this).outerHeight();
-    
+
       /**
        * The top and bottom pixels that are seen
        */
       let viewportTop = $(window).scrollTop();
       let viewportBottom = viewportTop + $(window).height();
 
-      // Create center variables
-      const viewportCenter =
-        viewportTop + ((viewportBottom - viewportTop) / 2);
-      const viewportCenterTop = viewportCenter - centerThreshold;
-      const viewportCenterBottom = viewportCenter + centerThreshold;
-      // Check if it's within the center
-      const withinViewportCenter =
-        elementBottom > viewportCenterTop &&
-        elementTop < viewportCenterBottom;
+      if (changeWhenCentered) {
+        // Create center variables
+        const viewportCenter =
+          viewportTop + ((viewportBottom - viewportTop) / 2);
+        const viewportCenterTop = viewportCenter - centerThreshold;
+        const viewportCenterBottom = viewportCenter + centerThreshold;
+        // Check if it's within the center
+        const withinViewportCenter =
+          elementBottom > viewportCenterTop &&
+          elementTop < viewportCenterBottom;
 
-      return withinViewportCenter;
+        return withinViewportCenter;
+      }
+
+      // changeWhenCentered = false
+      const withinViewport =
+        elementBottom > viewportTop &&
+        elementTop < viewportBottom;
+
+      return withinViewport;
     };
-    
+
     // Check if the user has scrolled up or down
-    $(window).scroll(function(event){
+    $(window).scroll(function (event) {
       let st = $(this).scrollTop();
 
       if (st > lastScrollTop) {
@@ -185,12 +193,12 @@ function debugObject(obj) {
 
       lastScrollTop = st;
     });
-    
+
     // On scroll
-    $(window).on("resize scroll", function() {
-      $(".bg").each(function() {
+    $(window).on("resize scroll", function () {
+      $(".bg").each(function () {
         let activeBackground = $(this).attr("id");
-        
+
         if ($(this).isInViewport()) {
           $previousThis = $(this);
 
@@ -217,8 +225,8 @@ function debugObject(obj) {
             $(".pb-12").addClass(historyObj.currentObject);
 
           }
-        // If the previous context exists and that div is visible in the
-        // viewport, and if the user is scrolling up, then run this
+          // If the previous context exists and that div is visible in the
+          // viewport, and if the user is scrolling up, then run this
         } else if ($previousThis &&
           $previousThis.isInViewport() &&
           !userScrolledDown) {
@@ -230,16 +238,17 @@ function debugObject(obj) {
           }
 
           scrollUpObject = previousBackground;
-            
+
           if (historyObj.currentObject == previousBackground ||
             historyObj.currentObject == activeBackground) {
 
             $(".pb-12").removeClass(historyObj.currentObject);
-            historyObj.currentObject = historyObj.objectsAbove.pop();
 
             if (isFullArray(historyObj.objectsAbove)) {
+              historyObj.currentObject = historyObj.objectsAbove.pop();
               $(".pb-12").addClass(historyObj.currentObject);
             } else if (setDefaultBackground) {
+              historyObj.currentObject = defaultBackgroundId;
               $(".pb-12").addClass(defaultBackgroundId);
             }
 
